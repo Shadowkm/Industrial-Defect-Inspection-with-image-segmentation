@@ -41,7 +41,6 @@ get_ipython().system("cat '/data/examples/NV_public_defects/Class1_def/labels.tx
 
 # ## Data Preprocessing/Exploration/Inspection
 
-# In[3]:
 
 
 import matplotlib.pyplot as plt
@@ -49,129 +48,57 @@ get_ipython().magic('matplotlib inline')
 get_ipython().system(' pip install --user xmltodict')
 
 
-# In[4]:
-
 
 from coslib.Plot import plot_ellipse_seg_test
 d_dataset = "/data/examples/NV_public_defects/"
 plot_ellipse_seg_test(d_dataset + '/Class1_def/1.png')
 
 
-# In[5]:
-
 
 plot_ellipse_seg_test(d_dataset + '/Class2_def/1.png')
 
-
-# In[6]:
-
-
 plot_ellipse_seg_test(d_dataset + '/Class3_def/1.png')
-
-
-# In[7]:
-
 
 plot_ellipse_seg_test(d_dataset + '/Class4_def/3.png')
 
-
-# In[8]:
-
-
 plot_ellipse_seg_test(d_dataset + '/Class5_def/1.png')
-
-
-# In[9]:
-
 
 plot_ellipse_seg_test(d_dataset + '/Class6_def/50.png')
 
-
-# In[11]:
 
 
 from coslib.DataIO import load_images_masks
 X, y = load_images_masks(d_dataset + '/Class1_def/', img_type='png', img_format='gray', resize=(512, 512), ellipse=True)
 
 
-# In[12]:
-
-
-X.shape
-
-
-# In[13]:
-
-
-y.shape
-
-
-# In[14]:
-
-
 plt.imshow(X[0,:,:,0], cmap='gray')
-
-
-# In[15]:
 
 
 plt.imshow(y[0,:,:,0], cmap='gray')
 
 
-# In[16]:
-
-
 import sklearn
-
-
-# In[17]:
 
 
 sklearn.__version__
 
 
-# In[19]:
-
-
 from sklearn.model_selection import train_test_split
-
-
-# In[20]:
-
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
-
-# In[21]:
-
-
-X_train.shape
-
-
-# In[22]:
-
-
-X_test.shape
 
 
 # ## Unet - Fully Convolutional Neuralnetwork
 
 # The u-net is convolutional network architecture for fast and precise segmentation of images. Up to now it has outperformed the prior best method (a sliding-window convolutional network) on the ISBI challenge for segmentation of neuronal structures in electron microscopic stacks. It has won the Grand Challenge for Computer-Automated Detection of Caries in Bitewing Radiography at ISBI 2015, and it has won the Cell Tracking Challenge at ISBI 2015 on the two most challenging transmitted light microscopy categories (Phase contrast and DIC microscopy) by a large margin.
 
-# In[24]:
-
 
 Image('./userdata/Unet-model.jpg')
-
-
-# In[25]:
-
 
 img_rows = 512
 img_cols = 512
 
-
-# In[26]:
 
 
 from keras.models import Model
@@ -181,11 +108,6 @@ from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from keras import backend as K
 from scipy.ndimage.measurements import label
 import time
-
-
-# In[27]:
-
-
 ### Defining a small Unet
 ### Smaller Unet defined so it fits in memory
 
@@ -235,14 +157,8 @@ def get_small_unet():
     return model
 
 
-# In[28]:
-
 
 model = get_small_unet()
-
-
-# In[29]:
-
 
 ### IOU or dice coeff calculation
 def IOU_calc(y_true, y_pred):
@@ -256,34 +172,18 @@ def IOU_calc(y_true, y_pred):
 def IOU_calc_loss(y_true, y_pred):
     return -IOU_calc(y_true, y_pred)
 
-
-# In[30]:
-
-
 smooth = 1.
 model.compile(optimizer=Adam(lr=1e-4), loss=IOU_calc_loss, metrics=[IOU_calc])
-
-
-# In[31]:
-
-
 history = model.fit(X_train, y_train, batch_size=10, epochs=50, verbose=1, validation_split=0.1)
 
 
 # ## Learning curves
-
-# In[32]:
-
-
 plt.figure(figsize=(20, 5))
 plt.plot(model.history.history['loss'], label='Train loss')
 plt.plot(model.history.history['val_loss'], label='Val loss')
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 plt.legend()
-
-
-# In[33]:
 
 
 plt.figure(figsize=(20, 5))
@@ -296,13 +196,8 @@ plt.legend()
 
 # ## Predict on testing data
 
-# In[34]:
-
 
 predict = model.predict(X_test)
-
-
-# In[35]:
 
 
 import numpy as np
@@ -344,94 +239,52 @@ def predict_evaluation(pred, image, label):
     plt.axis('off')
 
 
-# In[36]:
-
-
 predict_evaluation(predict[0,:,:,0], X_test[0,:,:,0], y_test[0,:,:,0])
 
-
-# In[37]:
-
-
 predict_evaluation(predict[1,:,:,0], X_test[1,:,:,0], y_test[1,:,:,0])
-
-
-# In[38]:
-
 
 predict_evaluation(predict[2,:,:,0], X_test[2,:,:,0], y_test[2,:,:,0])
 
 
-# In[39]:
-
-
 predict_evaluation(predict[3,:,:,0], X_test[3,:,:,0], y_test[3,:,:,0])
-
-
-# In[40]:
-
 
 predict_evaluation(predict[4,:,:,0], X_test[4,:,:,0], y_test[4,:,:,0])
 
-
-# In[41]:
-
-
 predict_evaluation(predict[5,:,:,0], X_test[5,:,:,0], y_test[5,:,:,0])
 
-
-# In[42]:
-
-
 predict_evaluation(predict[6,:,:,0], X_test[6,:,:,0], y_test[6,:,:,0])
-
-
-# In[43]:
 
 
 predict_evaluation(predict[7,:,:,0], X_test[7,:,:,0], y_test[7,:,:,0])
 
 
-# In[44]:
-
-
 predict_evaluation(predict[8,:,:,0], X_test[8,:,:,0], y_test[8,:,:,0])
-
-
-# In[45]:
-
 
 predict_evaluation(predict[9,:,:,0], X_test[9,:,:,0], y_test[9,:,:,0])
 
 
 # ## Save model for later use
 
-# In[46]:
+
 
 
 model_json_string = model.to_json()
 
 
-# In[47]:
 
 
 with open('./userdata/model.json', 'w') as f:
     f.write(model_json_string)
 
 
-# In[48]:
 
 
 model.save_weights('./userdata/model.h5')
 
 
-# In[49]:
-
 
 get_ipython().system('ls ./userdata/')
 
-
-# In[50]:
 
 
 from coslib.ModelIO import convert_keras_to_pb
